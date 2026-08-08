@@ -26,13 +26,63 @@ st.set_page_config(
     page_icon="🌱"
 )
 
-st.title("🌱 BuddyAI")
-st.write("A friendly space to talk, practice, and feel heard.")
 
-
-# Store conversation
+# Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "starter" not in st.session_state:
+    st.session_state.starter = None
+
+
+st.title("🌱 BuddyAI")
+st.caption("A safe space to talk, think, practice, and take a breath.")
+
+
+# Welcome message
+if not st.session_state.messages:
+    st.info(
+        "Hi! I'm BuddyAI. You can talk to me about your day, "
+        "practice a conversation, or simply chat."
+    )
+
+
+# Conversation starters
+if not st.session_state.messages:
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("Talk about my day"):
+            st.session_state.starter = "I want to talk about my day."
+
+    with col2:
+        if st.button("Practice a conversation"):
+            st.session_state.starter = "I want to practice a conversation."
+
+    with col3:
+        if st.button("Help me relax"):
+            st.session_state.starter = (
+                "I want to relax and take my mind off things."
+            )
+
+
+# Start a new conversation
+if st.button("New Conversation"):
+    st.session_state.messages = []
+    st.session_state.starter = None
+    st.rerun()
+
+
+# Conversation mode
+mode = st.selectbox(
+    "What do you need right now?",
+    [
+        "Just talk",
+        "Talk it out",
+        "Sort it out",
+        "Take my mind off it"
+    ]
+)
 
 
 # Display previous messages
@@ -42,6 +92,12 @@ for message in st.session_state.messages:
 
 
 user_message = st.chat_input("Talk to BuddyAI...")
+
+
+# Use a starter message if selected
+if st.session_state.starter:
+    user_message = st.session_state.starter
+    st.session_state.starter = None
 
 
 if user_message:
@@ -55,10 +111,37 @@ if user_message:
         st.write(user_message)
 
 
+    mode_instruction = {
+        "Just talk": (
+            "Have a natural, relaxed conversation with the user."
+        ),
+        "Talk it out": (
+            "Let the user express what is bothering them. "
+            "Listen first and avoid immediately giving solutions."
+        ),
+        "Sort it out": (
+            "Help the user organize what is bothering them "
+            "and think through practical, realistic next steps."
+        ),
+        "Take my mind off it": (
+            "Help the user take their mind off the situation "
+            "through light conversation, humor, a simple game, "
+            "or another harmless distraction."
+        )
+    }
+
+
     messages = [
         {
             "role": "system",
             "content": BUDDY_SYSTEM_PROMPT
+        },
+        {
+            "role": "system",
+            "content": (
+                f"Current conversation mode: {mode}. "
+                f"{mode_instruction[mode]}"
+            )
         }
     ]
 
