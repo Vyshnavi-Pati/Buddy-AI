@@ -16,7 +16,6 @@ if not api_key:
     st.error("GROQ_API_KEY is missing. Please check your .env file.")
     st.stop()
 
-
 # Create Groq client
 client = Groq(api_key=api_key)
 
@@ -149,8 +148,9 @@ if user_message:
 
 
     try:
+        MODEL = "openai/gpt-oss-120b"
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=MODEL,
             messages=messages
         )
 
